@@ -1,6 +1,6 @@
 package com.pos.artists.repository;
 
-import com.pos.artists.entity.Artist;
+import com.pos.commons.entity.Artist;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 package com.pos.artists.service;
 
-import com.pos.artists.entity.Artist;
+import com.pos.commons.entity.Artist;
 
 import java.util.Optional;
 import java.util.Set;
@@ -8,8 +8,11 @@ import java.util.Set;
 public interface ArtistService {
     Optional<Artist> findArtistByName(String name);
     Set<Artist> findActiveArtists(boolean active);
-    Set<Artist> findAllArtists();
+    Set<Artist> findAllArtists(Integer page, Integer itemsPerPage);
     Optional<Artist> findByUUID(String uuid);
     void deleteArtistByName(String name);
-    void saveArtist(Artist artist);
+    Artist saveArtist(Artist artist);
+    Optional<Artist> saveOrUpdate(Artist artist, String uuid);
+
+    void deleteArtistByUUID(String uuid);
 }

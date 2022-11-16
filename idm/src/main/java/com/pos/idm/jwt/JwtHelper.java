@@ -1,6 +1,5 @@
 package com.pos.idm.jwt;
 
-import com.pos.idm.entity.UserEntity;
 import com.pos.idm.exception.InvalidJWTException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

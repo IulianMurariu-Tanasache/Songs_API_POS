@@ -6,7 +6,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>idm</module>
-        <module>music</module>
+        <module>songs</module>
         <module>artists</module>
         <module>gateway</module>
         <module>commons</module>

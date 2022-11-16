@@ -1,6 +1,5 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            targetNamespace="http://techprimers.com/spring-boot-soap-example"
-           xmlns:w="http://techprimers.com/spring-boot-soap-example"
            elementFormDefault="qualified">
 
     <xs:element name="authRequest">
