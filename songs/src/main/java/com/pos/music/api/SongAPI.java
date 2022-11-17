@@ -8,7 +8,7 @@ import java.util.Set;
 
 @RequestMapping("/api/songcollection/songs")
 public interface SongAPI {
-
+    // TODO: more work on the paging uri -> copy from artists and add more
     @GetMapping
     ResponseEntity<Set<SongDTO>> getAllSongs(@RequestParam Integer page, @RequestParam("items_per_page") Integer itemsPerPage);
 

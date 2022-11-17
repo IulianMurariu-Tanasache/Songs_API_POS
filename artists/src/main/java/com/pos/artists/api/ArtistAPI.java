@@ -1,18 +1,26 @@
 package com.pos.artists.api;
 
 import com.pos.commons.dto.ArtistDTO;
+import com.pos.commons.dto.SongDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
-@RequestMapping("/api/songcollection/artists/")
+@RequestMapping("/api/songcollection/artists")
 public interface ArtistAPI {
     @GetMapping
-    ResponseEntity<Set<ArtistDTO>> getAllArtists(@RequestParam Integer page, @RequestParam("items_per_page") Integer itemsPerPage);
+    ResponseEntity<Set<ArtistDTO>> getAllArtists
+            (@RequestParam(required = false) Integer page,
+            @RequestParam(value = "items_per_page", defaultValue = "10") Integer itemsPerPage,
+            @RequestParam(required = false) String name,
+            @RequestParam(value = "exact_match", defaultValue = "true") Boolean exactMatch);
 
     @GetMapping("/{uuid}")
     ResponseEntity<ArtistDTO> getArtistByUUID(@PathVariable String uuid);
+
+    @GetMapping("/{uuid}/songs")
+    ResponseEntity<Set<SongDTO>> getSongsOfArtist(@PathVariable String uuid);
 
     @PostMapping
     ResponseEntity<Void> addArtist(@RequestBody ArtistDTO artistDTO);

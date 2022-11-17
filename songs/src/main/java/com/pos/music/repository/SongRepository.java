@@ -21,7 +21,7 @@ public interface SongRepository extends PagingAndSortingRepository<Song, Integer
             "m_a.id = a.id AND " +
             "a.name = :artist"
     )
-    Set<Song> findSongByArtist(String artist);
+    Set<Song> findSongsByArtist(String artist);
     Set<Song> findSongByReleaseYear(Integer year);
     void deleteSongByName(String name);
 }

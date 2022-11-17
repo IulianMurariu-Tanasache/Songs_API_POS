@@ -1,17 +1,23 @@
 package com.pos.artists.repository;
 
 import com.pos.commons.entity.Artist;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
 @Repository
 public interface ArtistRepository extends PagingAndSortingRepository<Artist, String> {
-    Optional<Artist> findByName(String name);
-    @Query("select a from Artist a where a.active = :active")
-    Set<Artist> findActiveArtists(boolean active);
+    Page<Artist> findByName(Pageable pageable, String name);
     void deleteByName(String name);
+
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM ARTISTS WHERE NAME LIKE %:name%")
+    Page<Artist> findByNameLike(PageRequest pageRequest, String name);
 }

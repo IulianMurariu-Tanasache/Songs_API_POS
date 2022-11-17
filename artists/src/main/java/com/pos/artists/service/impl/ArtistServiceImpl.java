@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,21 +20,27 @@ public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
 
     @Override
-    public Optional<Artist> findArtistByName(String name) {
-        return artistRepository.findByName(name);
-    }
+    public Set<Artist> findArtistsByName(String name, Integer page, Integer itemsPerPage, Boolean exactMatch) {
+        PageRequest pageRequest = page == null ?
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("name").ascending()) :
+                PageRequest.of(page, itemsPerPage, Sort.by("name").ascending());
 
-    @Override
-    public Set<Artist> findActiveArtists(boolean active) {
-        return artistRepository.findActiveArtists(active);
+        return (exactMatch ?
+                    artistRepository.findByName(pageRequest, name) :
+                    artistRepository.findByNameLike(pageRequest, name))
+                        .stream()
+                        .collect(Collectors.toSet());
     }
 
     @Override
     public Set<Artist> findAllArtists(Integer page, Integer itemsPerPage) {
-        Set<Artist> set = new HashSet<>();
-        artistRepository.findAll(PageRequest.of(page, itemsPerPage, Sort.by("name").ascending()))
-                .forEach(set::add);
-        return set;
+        PageRequest pageRequest = page == null ?
+                PageRequest.of(0, Integer.MAX_VALUE, Sort.by("name").ascending()) :
+                PageRequest.of(page, itemsPerPage, Sort.by("name").ascending());
+
+        return artistRepository.findAll(pageRequest)
+                .stream()
+                .collect(Collectors.toSet());
     }
 
     @Override

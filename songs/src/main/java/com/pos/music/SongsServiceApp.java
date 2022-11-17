@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 @SpringBootApplication(scanBasePackages = "com.pos")
 public class SongsServiceApp {
 
-    //TODO: make albums have songs -> create a join table between albums and songs
     public static void main(String[] args) {
         SpringApplication.run(SongsServiceApp.class, args);
     }
