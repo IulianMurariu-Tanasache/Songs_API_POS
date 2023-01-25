@@ -30,7 +30,7 @@ public class Song {
     private Integer releaseYear;
 
     @ManyToMany(
-            fetch = FetchType.EAGER
+            fetch = FetchType.EAGER, cascade = CascadeType.ALL
     )
     @JoinTable(
             name = "music_artists",

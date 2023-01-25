@@ -1,2 +1,6 @@
 /**/.idea
 /**/target
+/**/*.iml
+/**/ops/mongo_volume
+/**/ops/sql_volume
+/**/grafana

@@ -1,11 +1,13 @@
 package com.pos.artists.api;
 
 import com.pos.artists.service.ArtistService;
+import com.pos.commons.api.ArtistAPI;
 import com.pos.commons.dto.ArtistDTO;
 import com.pos.commons.dto.SongDTO;
 import com.pos.commons.entity.Artist;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +31,6 @@ public class ArtistController implements ArtistAPI {
                     service.findArtistsByName(name, page, itemsPerPage, exactMatch))
                         .stream()
                         .map(artist -> mapper.map(artist, ArtistDTO.class))
-                        //.map(artistDTO -> artistDTO.add(WebMvcLinkBuilder.linkTo(ArtistController.class).slash(artistDTO.getUuid()).withSelfRel()))
                         .collect(Collectors.toSet()));
 
     }
@@ -38,7 +39,7 @@ public class ArtistController implements ArtistAPI {
     public ResponseEntity<ArtistDTO> getArtistByUUID(String uuid) {
         try {
             ArtistDTO artistDTO = service.findByUUID(uuid)
-                    .map(it -> mapper.map(it, ArtistDTO.class))
+                    .map(artist -> mapper.map(artist, ArtistDTO.class))
                     .orElseThrow(EntityNotFoundException::new);
             return ResponseEntity.ok(artistDTO);
         } catch (EntityNotFoundException e) {
@@ -46,23 +47,19 @@ public class ArtistController implements ArtistAPI {
         }
     }
 
-    // TODO: best way to do it?
     @Override
-    public ResponseEntity<Set<SongDTO>> getSongsOfArtist(String uuid) {
-        return null;
-    }
-
-    /*@Override
-    public ResponseEntity<Set<SongDTO>> getSongsOfArtist(String uuid) {
+    public ResponseEntity<Set<SongDTO>> getSongsOfArtist(Integer page, Integer itemsPerPage, String uuid) {
         try {
-            ArtistDTO artistDTO = service.findByUUID(uuid)
-                    .map(it -> mapper.map(it, ArtistDTO.class))
-                    .orElseThrow(EntityNotFoundException::new);
-            return
+            return ResponseEntity.ok(
+                    service.findSongsOfArtist(page, itemsPerPage, uuid).stream()
+                            .map(song -> mapper.map(song, SongDTO.class))
+                            .collect(Collectors.toSet())
+            );
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-    }*/
+    }
+
     @Override
     public ResponseEntity<Void> addArtist(ArtistDTO artistDTO) {
         String uuid = service.saveArtist(mapper.map(artistDTO, Artist.class)).getUuid();
@@ -79,8 +76,12 @@ public class ArtistController implements ArtistAPI {
     }
 
     @Override
-    public ResponseEntity<Void> deleteArtist(String uuid) {
-        service.deleteArtistByUUID(uuid);
+    public ResponseEntity<Void> deleteArtistById(String uuid) {
+        try {
+            service.deleteArtistByUUID(uuid);
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.noContent().build();
     }
 }

@@ -8,10 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-
 @Repository
 public interface ArtistRepository extends PagingAndSortingRepository<Artist, String> {
     Page<Artist> findByName(Pageable pageable, String name);

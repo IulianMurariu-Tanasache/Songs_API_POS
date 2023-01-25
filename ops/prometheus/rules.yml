@@ -1,0 +1,14 @@
+# File for defining rules and alerts to be sent
+groups:
+  - name: pos-services
+    rules:
+      - alert: InstanceDown
+        # Condition for alerting
+        expr: up == 0
+        for: 1m
+        # Annotation - additional informational labels to store more information
+        annotations:
+          summary: "Container {{ $labels.service }} is down"
+        # Labels - additional labels to be attached to the alert
+        labels:
+          severity: 'critical'

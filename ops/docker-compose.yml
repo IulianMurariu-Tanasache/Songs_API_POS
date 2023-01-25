@@ -1,0 +1,171 @@
+version: '3.7'
+services:
+  # this is a proxy for the docker socket. It allows prometheus to discover all containers and scrape data from them.
+#  docker-api-socat:
+#    container_name: docker-api-socat
+#    image: tecnativa/docker-socket-proxy:0.1
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    environment:
+#      NETWORKS: 1
+#      CONTAINERS: 1
+
+  pos-mysql:
+    image: mysql
+    container_name: pos-mysql
+    command: --init-file /data/application/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_TCP_PORT: "3307"
+    ports:
+      - "3307:3307"
+    expose:
+      - "3307"
+    volumes:
+      - ./sql_volume:/var/lib/mysql
+      - ./scripts/init.sql:/data/application/init.sql
+
+  pos-mongo:
+    container_name: pos-mongo
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
+    volumes:
+      - ./mongo_volume:/data/db
+
+  pos-gateway:
+    container_name: pos-gateway
+    labels:
+      pos_service: pos-gateway
+    image: gateway:1.0-SNAPSHOT
+    environment:
+      IDM_HOST: pos-idm
+      ARTISTS_HOST: pos-artists
+      SONGS_HOST: pos-songs
+      PLAYLISTS_HOST: pos-playlists
+      USERDATA_HOST: pos-userdata
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    depends_on:
+      - pos-idm
+      - pos-artists
+      - pos-playlists
+      - pos-userdata
+
+  pos-idm:
+    image: idm:1.0-SNAPSHOT
+    labels:
+      pos_service: pos-idm
+    container_name: pos-idm
+    environment:
+      MYSQL_HOST: pos-mysql
+    ports:
+      - "8001:8001"
+    expose:
+      - "8001"
+    depends_on:
+      - pos-mysql
+
+  pos-songs:
+    container_name: pos-songs
+    labels:
+      pos_service: pos-songs
+    image: songs:1.0-SNAPSHOT
+    environment:
+      MYSQL_HOST: pos-mysql
+    ports:
+      - "8002:8002"
+    expose:
+      - "8002"
+    depends_on:
+      - pos-mysql
+
+  pos-artists:
+    image: artists:1.0-SNAPSHOT
+    labels:
+      pos_service: pos-artists
+    container_name: pos-artists
+    environment:
+      MYSQL_HOST: pos-mysql
+    ports:
+      - "8003:8003"
+    expose:
+      - "8003"
+    depends_on:
+      - pos-mysql
+
+  pos-playlists:
+    image: playlists:1.0-SNAPSHOT
+    labels:
+      pos_service: pos-playlists
+    container_name: pos-playlists
+    environment:
+      MONGO_HOST: pos-mongo
+    ports:
+      - "8004:8004"
+    expose:
+      - "8004"
+    depends_on:
+      - pos-mongo
+
+  pos-userdata:
+    image: user_data:1.0-SNAPSHOT
+    labels:
+      pos_service: pos-userdata
+    container_name: pos-userdata
+    environment:
+      MONGO_HOST: pos-mongo
+    ports:
+      - "8005:8005"
+    expose:
+      - "8005"
+    depends_on:
+      - pos-mongo
+
+  pos-prometheus:
+    image: prom/prometheus
+    container_name: pos-prometheus
+    volumes:
+      - ${PROMETHEUS_CONFIG:-./prometheus/prometheus-docker.yml}:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    expose:
+      - "9090"
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # needed for prometheus to communicate with apps on the host
+    depends_on:
+      - pos-alertmanager
+
+  pos-alertmanager:
+    image: prom/alertmanager
+    container_name: pos-alertmanager
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/config.yml
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    expose:
+      - 9093
+
+#  pos-grafana:
+#      image: grafana/grafana
+#      container_name: pos-grafana
+#      volumes:
+#        - ./grafana/volume:/var/lib/grafana
+#      environment:
+#        - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+#        - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+#        - GF_USERS_ALLOW_SIGN_UP=false
+#      expose:
+#        - 3000
+#      ports:
+#        - "3000:3000"
+#      depends_on:
+#        - pos-prometheus

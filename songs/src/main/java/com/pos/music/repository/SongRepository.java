@@ -1,19 +1,18 @@
 package com.pos.music.repository;
 
 import com.pos.commons.entity.Song;
-import com.pos.commons.enums.MusicType;
-import com.pos.commons.enums.SongGenre;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.Set;
 
 @Repository
+@Transactional
 public interface SongRepository extends PagingAndSortingRepository<Song, Integer> {
 
-    Set<Song> findSongByGenre(SongGenre genre);
-    Set<Song> findSongByType(MusicType type);
     @Query(nativeQuery = true, value =
             "SELECT m.* " +
             "FROM music as m, music_artists as m_a, artists as a " +
@@ -22,6 +21,10 @@ public interface SongRepository extends PagingAndSortingRepository<Song, Integer
             "a.name = :artist"
     )
     Set<Song> findSongsByArtist(String artist);
-    Set<Song> findSongByReleaseYear(Integer year);
     void deleteSongByName(String name);
+
+    Set<Song> findByName(PageRequest pageRequest, String name);
+
+    @Query(value = "SELECT * FROM music WHERE name LIKE %:name%", nativeQuery = true)
+    Set<Song> findByNameLike(PageRequest pageRequest, String name);
 }

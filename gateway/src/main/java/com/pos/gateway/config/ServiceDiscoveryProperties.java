@@ -6,10 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties("service")
 public class ServiceDiscoveryProperties {
-    private String idmHost;
-    private int idmPort;
-    /*private String artistHost;
-    private int artistPort;
-    private String musicHost;
-    private int musicPort;*/
+    private String idmServiceLocation;
+    private String songServiceLocation;
+    private String artistServiceLocation;
+    private String playlistServiceLocation;
+    private String userDataServiceLocation;
+    private String frontEndLocation;
 }

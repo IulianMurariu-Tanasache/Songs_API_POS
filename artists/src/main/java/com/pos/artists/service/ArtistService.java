@@ -1,7 +1,9 @@
 package com.pos.artists.service;
 
 import com.pos.commons.entity.Artist;
+import com.pos.commons.entity.Song;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,4 +15,5 @@ public interface ArtistService {
     Artist saveArtist(Artist artist);
     Optional<Artist> saveOrUpdate(Artist artist, String uuid);
     void deleteArtistByUUID(String uuid);
+    Set<Song> findSongsOfArtist(Integer page, Integer itemsPerPage, String uuid) throws EntityNotFoundException;
 }

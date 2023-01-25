@@ -1,0 +1,8 @@
+envelope:
+  noBodyEnvelope: |
+    <SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'
+                xmlns:w='idm_namespace'>
+    <SOAP-ENV:Header/>
+    <SOAP-ENV:Body>
+    </SOAP-ENV:Body>
+    </SOAP-ENV:Envelope>

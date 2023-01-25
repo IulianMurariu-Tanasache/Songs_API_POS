@@ -1,5 +1,6 @@
 package com.pos.idm.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -16,28 +17,36 @@ import org.springframework.xml.xsd.XsdSchema;
 @Configuration
 public class SoapWebServiceConfig extends WsConfigurerAdapter {
 
+    @Value("${soap.endpoint}")
+    private String soapEndpoint;
+    @Value("${soap.namespace}")
+    private String soapNamespace;
+    @Value("${soap.xsd}")
+    private String xsd;
+
     @Bean
     public ServletRegistrationBean messageDispatcherServlet(ApplicationContext context) {
         MessageDispatcherServlet servlet = new MessageDispatcherServlet();
         servlet.setApplicationContext(context);
         servlet.setTransformWsdlLocations(true);
-        return new ServletRegistrationBean(servlet, "/soapWS/*");
+        return new ServletRegistrationBean(servlet, "/" + soapEndpoint + "/*");
     }
 
 
     @Bean
     public XsdSchema userSchema() {
-        return new SimpleXsdSchema(new ClassPathResource("user.xsd"));
+        return new SimpleXsdSchema(new ClassPathResource(xsd));
     }
 
     @Bean(name = "users")
     public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema userSchema) {
 
         DefaultWsdl11Definition definition = new DefaultWsdl11Definition();
+
         definition.setSchema(userSchema);
-        definition.setLocationUri("/soapWS");
+        definition.setLocationUri("/" + soapEndpoint);
         definition.setPortTypeName("myServicePort");
-        definition.setTargetNamespace("http://techprimers.com/spring-boot-soap-example");
+        definition.setTargetNamespace(soapNamespace);
         return definition;
     }
 

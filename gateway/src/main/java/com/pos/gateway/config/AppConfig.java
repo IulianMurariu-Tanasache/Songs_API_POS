@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-@EnableConfigurationProperties(ServiceDiscoveryProperties.class)
+@EnableConfigurationProperties({ServiceDiscoveryProperties.class, EnvelopeProperties.class})
 public class AppConfig {
 
     @Bean

@@ -1,0 +1,17 @@
+# alertmanager configuration file for sending alerts with gmail
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: 'gmail-notifications'
+
+receivers:
+  - name: 'gmail-notifications'
+    email_configs:
+      - to: alertmanager.pos1@gmail.com # parola: alertmanager.pos111 -> nu are 2steps, te poti loga
+        from: alertmanager.pos@gmail.com # parola: alertmanager.pos00 -> !!! are 2 steps verification pe telefonul meu
+        smarthost: smtp.gmail.com:587
+        auth_username: alertmanager.pos@gmail.com
+        auth_identity: alertmanager.pos@gmail.com
+        auth_password: rypgliyjckasmbck
+        send_resolved: true

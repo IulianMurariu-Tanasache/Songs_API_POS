@@ -22,7 +22,4 @@ public class Artist {
 
     private String name;
     private boolean active = true;
-
-    //@ManyToMany(mappedBy = "artistSet")
-    //private Set<Song> songSet;
 }

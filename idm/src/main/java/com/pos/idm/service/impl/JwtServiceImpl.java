@@ -8,9 +8,7 @@ import com.pos.idm.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,13 +29,19 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public Set<String> validateJwt(String jwt) throws InvalidJWTException {
-        List<Map<String, String>> authorities =  jwtHelper.verifyToken(jwt);
-        return new HashSet<>();
+    public List<String> validateJwt(String jwt) throws InvalidJWTException {
+        List<String> authorities =  jwtHelper.verifyToken(jwt);
+        System.out.println(authorities);
+        return authorities;
     }
 
     @Override
     public String getUsernameFromJWT(String jwt) throws InvalidJWTException {
         return jwtHelper.getJWTBody(jwt).getSubject();
+    }
+
+    @Override
+    public void invalidateToken(String jwt) throws InvalidJWTException {
+        jwtHelper.invalidateToken(jwt);
     }
 }

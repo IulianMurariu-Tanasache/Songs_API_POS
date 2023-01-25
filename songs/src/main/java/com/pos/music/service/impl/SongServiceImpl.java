@@ -1,61 +1,68 @@
 package com.pos.music.service.impl;
 
+import com.pos.commons.entity.Artist;
 import com.pos.commons.entity.Song;
 import com.pos.commons.enums.MusicType;
 import com.pos.commons.enums.SongGenre;
+import com.pos.music.repository.ArtistRepository;
 import com.pos.music.repository.SongRepository;
 import com.pos.music.service.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.pos.commons.util.ServiceUtility.makePageRequest;
 
 @RequiredArgsConstructor
 @Service
 public class SongServiceImpl implements SongService {
 
     private final SongRepository songRepository;
+    private final ArtistRepository artistRepository;
 
     @Override
     public Optional<Song> findSongById(Integer id) {
         return songRepository.findById(id);
     }
 
-    @Override
-    public Set<Song> findSongByGenre(SongGenre genre) {
-        return songRepository.findSongByGenre(genre);
+    private Set<Song> findSongsByName(PageRequest pageRequest, String name, Boolean exactMatch) {
+        return (exactMatch ?
+                songRepository.findByName(pageRequest, name) :
+                songRepository.findByNameLike(pageRequest, name));
     }
 
-    @Override
-    public Set<Song> findSongByType(MusicType type) {
-        return songRepository.findSongByType(type);
-    }
+//    @Override
+//    public Set<Song> findSongByArtist(String artist) {
+//        return songRepository.findSongsByArtist(artist);
+//    }
 
     @Override
-    public Set<Song> findSongByArtist(String artist) {
-        return songRepository.findSongByArtist(artist);
-    }
+    public Set<Song> findAllSongs(Integer page,
+                                  Integer itemsPerPage,
+                                  String name,
+                                  Boolean exactMatch,
+                                  SongGenre genre,
+                                  MusicType type,
+                                  Integer releaseYear) {
 
-    @Override
-    public Set<Song> findSongByReleaseYear(Integer year) {
-        return songRepository.findSongByReleaseYear(year);
-    }
+        Set<Song> songs = name == null ?
+                songRepository.findAll(makePageRequest(page, itemsPerPage)).toSet() :
+                this.findSongsByName(makePageRequest(page, itemsPerPage), name, exactMatch);
 
-    @Override
-    public Set<Song> findAllSongs(Integer page, Integer itemsPerPage) {
-        Set<Song> set = new HashSet<>();
-        songRepository.findAll(PageRequest.of(page,itemsPerPage, Sort.by("name").ascending()))
-                .forEach(set::add);
-        return set;
-    }
+        if(genre != null)
+            songs = songs.stream().filter(song -> song.getGenre().equals(genre)).collect(Collectors.toSet());
+        if(type != null)
+            songs = songs.stream().filter(song -> song.getType().equals(type)).collect(Collectors.toSet());
+        if(releaseYear != null)
+            songs = songs.stream().filter(song -> song.getReleaseYear().equals(releaseYear)).collect(Collectors.toSet());
 
-    @Override
-    public void deleteSongByName(String name) {
-        songRepository.deleteSongByName(name);
+        return songs;
     }
 
     @Override
@@ -64,18 +71,22 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Song saveSong(Song song) {
+    public Song saveSong(Song song) throws EntityNotFoundException {
+        Set<Artist> artistDBSet = new HashSet<>();
+        for(Artist artistReceived : song.getArtistSet()) {
+            System.out.println(artistReceived.getUuid());
+            Optional<Artist> artist = artistRepository.findArtistByUUID(artistReceived.getUuid());
+            artistDBSet.add(artist.orElseThrow(() -> new EntityNotFoundException("Artist not found!")));
+        }
+        song.setArtistSet(artistDBSet);
         return songRepository.save(song);
     }
 
     @Override
-    public Optional<Song> saveOrUpdate(Song song, Integer id) {
+    public Optional<Song> saveOrUpdate(Song song, Integer id) throws EntityNotFoundException {
         song.setId(id);
-        if(songRepository.existsById(id))
-            return Optional.of(songRepository.save(song));
-        else {
-            songRepository.save(song);
-            return Optional.empty();
-        }
+        Optional<Song> existing = songRepository.findById(id);
+        songRepository.save(song);
+        return existing;
     }
 }
